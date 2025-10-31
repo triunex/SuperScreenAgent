@@ -1,124 +1,164 @@
-# SuperAgent - Production-Ready AI Agent
+# SuperAgent - Advanced AI Agent with Multi-Level Planning
 
-**Vision-based autonomous agent with OODA loop architecture**
+**Enhanced OODA loop agent with vision, self-reflection, and intent understanding**
 
-Built from scratch to replace ScreenAgent with:
-- ✅ **90-95% accuracy** (vision-based = UI-change resilient)
-- ✅ **<3s response time** (Claude 3.5 Sonnet via OpenRouter)
-- ✅ **Enterprise-grade** (safe for production use)
-- ✅ **Superhuman speed** (0.02s typing, instant clicks)
+## Features
+
+- ✅ **Multi-level Planning** - Strategic → Tactical → Operational hierarchy
+- ✅ **Intent-Based Execution** - Understands WHAT you want, not HOW
+- ✅ **Vision Integration** - Google Gemini 2.5 Flash for screen understanding
+- ✅ **Loop Detection** - Prevents infinite loops, forces progress
+- ✅ **Self-Reflection** - Detects failures and adapts approach
+- ✅ **Direct App Control** - Launches Chrome, Gmail, Slack, etc.
+- 🔄 **Active Development** - Fixing Xpra rendering and tactical planning
 
 ---
 
 ## 🏗️ Architecture
 
-### OODA Loop
 ```
-OBSERVE  → Screenshot current state (scrot)
-ORIENT   → Analyze with Claude 3.5 Sonnet vision API
-DECIDE   → Choose next action (click, type, hotkey, etc.)
-ACT      → Execute via pyautogui on X11
+┌─────────────────────────────────────────┐
+│         EnhancedSuperAgent              │
+├─────────────────────────────────────────┤
+│  • Strategic Planning (Goal → Steps)    │
+│  • Tactical Planning (Steps → Actions)  │
+│  • OODA Loop (Observe-Decide-Act)       │
+│  • Self-Reflection & Adaptation          │
+│  • Loop Detection & Breaking             │
+└─────────────────────────────────────────┘
+           │                    │
+           ▼                    ▼
+    ┌────────────┐      ┌──────────────┐
+    │   Vision   │      │   Executor   │
+    │  (Gemini)  │      │  (PyAutoGUI) │
+    └────────────┘      └──────────────┘
 ```
 
 ### Components
 
 | File | Purpose | Status |
 |------|---------|--------|
-| `actions.py` | Action types, dataclasses | ✅ Complete |
-| `vision.py` | Claude vision API integration | ✅ Complete |
-| `executor.py` | X11 action execution (pyautogui) | ✅ Complete |
-| `memory.py` | Short-term + workflow memory | ✅ Complete |
-| `core.py` | Main OODA loop agent | ✅ Complete |
-| `workflows.py` | Multi-app orchestration | ⏳ Pending |
+| `enhanced_core.py` | Multi-level planning agent | ✅ Complete |
+| `actions.py` | Action types & results | ✅ Complete |
+| `gemini_vision.py` | Google Gemini 2.5 Flash API | ✅ Complete |
+| `advanced_vision.py` | OCR + UI detection | ✅ Complete |
+| `executor.py` | PyAutoGUI execution | ✅ Complete |
+| `memory.py` | Short/long-term memory | ✅ Complete |
+| `workflows.py` | Multi-app orchestration | ✅ Complete |
 
 ---
 
 ## 🚀 Quick Start
 
 ### 1. Set API Key
-```powershell
-$env:OPENROUTER_API_KEY = "sk-or-v1-..."
+```bash
+export GEMINI_API_KEY="your_key_here"
 ```
 
-### 2. Rebuild Container
-```powershell
-.\test-superagent.ps1
+### 2. Run Agent
+```python
+from superagent.enhanced_core import EnhancedSuperAgent
+from superagent.gemini_vision import GeminiVisionAPI
+
+vision_api = GeminiVisionAPI(api_key="YOUR_KEY", model="gemini-2.5-flash")
+agent = EnhancedSuperAgent(vision_api=vision_api, max_iterations=50)
+
+result = agent.execute_task("find information about OpenAI")
 ```
 
-This will:
-- Rebuild Docker container with SuperAgent
-- Run unit tests (screenshot, vision API, executor, full agent)
-- Start container with Xpra + 12 apps
-
-### 3. Test via Frontend
-Open `superagent-test.html` in browser:
-- Example tasks: "Find Chrome icon and click it"
-- Real-time stats: response time, success rate
-- Visual feedback
-
-### 4. Test via API
-```powershell
-Invoke-RestMethod -Uri "http://localhost:8081/api/superagent/execute" `
-  -Method Post `
-  -ContentType "application/json" `
-  -Body '{"task":"Open Chrome browser"}'
+### 3. Test via API
+```bash
+curl -X POST http://localhost:10000/api/superagent/execute \
+  -H "Content-Type: application/json" \
+  -d '{"task": "find information about OpenAI", "userId": "test"}'
 ```
+---
+
+## 📊 Current Status
+
+### ✅ Working
+- Gemini 2.5 Flash vision integration
+- Multi-level planning (strategic + tactical)
+- Loop detection and breaking
+- Intent-based task understanding
+- Direct app launching (Chrome, Gmail, etc.)
+- Self-reflection on failures
+
+### 🔄 Known Issues
+1. **Vision sees blank screens** - Xpra rendering delay (screenshots are black)
+2. **Tactical planning shallow** - Creates 1-step plans instead of multi-step
+3. **Frontend iframe sync** - SocketIO events not opening iframe automatically
+4. **Rate limiting** - Hitting Gemini free tier limits (429 errors)
+5. **Early task completion** - Stops after loop break instead of continuing
+
+### 🎯 Priority Fixes (Next 4 Days)
+1. Increase wait time after app launch (5s → 15s)
+2. Add window focus commands (`wmctrl -a`)
+3. Improve tactical planning depth
+4. Fix SocketIO broadcast for iframe windows
+5. Add hardcoded fallback interactions
 
 ---
 
-## 📊 Performance
+## 📊 Performance Metrics
 
-### Target Metrics
-- **Accuracy**: 90-95% task success rate
-- **Speed**: <3s average response time (2-3s vision + 0.1-0.5s execution)
-- **Reliability**: Handles UI changes (vision-based = 85-95% resilient vs Selenium's 10%)
+### Current (With Vision Issues)
+- Task duration: 40-60 seconds
+- Success rate: ~30%
+- Vision API latency: 3-5 seconds
+- Actions per task: 3-5
+- Loop iterations: 3-15
 
-### Current Stats
-```python
-from superagent.core import SuperAgent
-
-agent = SuperAgent(api_key="...")
-stats = agent.get_stats()
-
-# {
-#   'vision': {'avg_response_time': 2.3, 'success_rate': 95.2},
-#   'executor': {'avg_execution_time': 0.2, 'success_rate': 98.5},
-#   'short_memory': {'entries': 5, 'success_rate': 94.0}
-# }
-```
+### Target (After Fixes)
+- Task duration: 30-45 seconds
+- Success rate: >80%
+- Vision API latency: 2-4 seconds  
+- Actions per task: 5-10
+- Loop iterations: 5-8
 
 ---
 
 ## 🎯 Action Types
 
-| Action | Purpose | Parameters |
-|--------|---------|------------|
-| **CLICK** | Single click | x, y |
-| **DOUBLE_CLICK** | Open files/apps | x, y |
-| **RIGHT_CLICK** | Context menu | x, y |
-| **TYPE** | Enter text | text |
-| **HOTKEY** | Keyboard shortcuts | keys (e.g., ['ctrl', 'c']) |
-| **SCROLL** | Scroll content | amount (positive=down, negative=up) |
-| **DRAG** | Drag & drop | x, y, target_x, target_y |
-| **WAIT** | Pause execution | amount (seconds) |
-| **EXPLORE** | Find alternative UI path | - |
-| **VERIFY** | Check action succeeded | expected_outcome |
-| **DONE** | Task complete | reason |
+| Action | Purpose | Status |
+|--------|---------|--------|
+| **OPEN_APP** | Launch application | ✅ Working |
+| **CLICK** | Single click | ✅ Working |
+| **DOUBLE_CLICK** | Open files/apps | ✅ Working |
+| **RIGHT_CLICK** | Context menu | ✅ Working |
+| **TYPE** | Enter text | ✅ Working |
+| **HOTKEY** | Keyboard shortcuts | ✅ Working |
+| **SCROLL** | Scroll content | ✅ Working |
+| **DRAG** | Drag & drop | ✅ Working |
+| **WAIT** | Pause execution | ✅ Working |
+| **DONE** | Task complete | ✅ Working |
 
 ---
 
-## 🧠 Memory System
+## 🧠 Memory & Planning
 
-### Short-Term Memory
-- Last 10 actions with success/failure
-- Loop detection (stops if stuck)
-- Context for LLM (history, success rate)
+### Multi-Level Planning
+```python
+# Strategic Level: "Find information about OpenAI"
+Strategic Plan:
+  - Open browser
+  - Search for information
+  - Extract and format results
 
-### Workflow Memory (Persistent)
-- Successful action sequences per task
-- UI element locations per app
-- Learns patterns over time
-- Saved to `/var/log/superagent_memory.json`
+# Tactical Level: "Open browser"
+Tactical Plan:
+  - Launch Chrome application
+  - Wait for window to appear
+  - Verify browser is ready
+
+# Operational Level: Execute individual actions
+Actions: [OPEN_APP(chrome), WAIT(10), CLICK(search_bar), ...]
+```
+
+### Memory Systems
+- **Short-term**: Last 20 actions, loop detection (3x threshold)
+- **Long-term**: Successful workflows saved to `/var/log/superagent_memory.json`
+- **Self-reflection**: Analyzes failures every 3 iterations
 
 ---
 
@@ -141,73 +181,117 @@ agent = SuperAgent(
 )
 ```
 
-### Vision API Optimizations
+### Vision API Configuration
 ```python
-# In vision.py:
-"max_tokens": 600,      # Fast responses
-"temperature": 0.3,     # Consistent behavior
-"top_p": 0.9           # Focused decisions
+# Gemini 2.5 Flash (Primary)
+GeminiVisionAPI(
+    api_key="YOUR_KEY",
+    model="gemini-2.5-flash",
+    timeout=30
+)
+
+# Response config:
+{
+    "maxOutputTokens": 2048,  # Increased from 600
+    "temperature": 0.3,        # Consistent behavior
+    "topP": 0.9                # Focused decisions
+}
 ```
 
 ---
 
 ## 🎬 Example Usage
 
-### Simple Task
+### Basic Task Execution
 ```python
-from superagent.core import SuperAgent
+from superagent.enhanced_core import EnhancedSuperAgent
+from superagent.gemini_vision import GeminiVisionAPI
 
-agent = SuperAgent(api_key=os.getenv('OPENROUTER_API_KEY'))
-result = agent.execute_task("Find and click the Chrome icon")
+vision_api = GeminiVisionAPI(api_key="YOUR_KEY", model="gemini-2.5-flash")
+agent = EnhancedSuperAgent(
+    vision_api=vision_api,
+    max_iterations=50,
+    enable_reflection=True,
+    enable_verification=True
+)
 
-print(f"Success: {result.success}")
-print(f"Actions: {result.actions_taken}")
-print(f"Duration: {result.duration:.2f}s")
+result = agent.execute_task("find information about OpenAI", timeout=300)
+
+print(f"Success: {result['success']}")
+print(f"Actions: {result['actions_taken']}")
+print(f"Duration: {result['duration']:.1f}s")
 ```
 
-### Multi-Task Workflow
+### With App Launcher
 ```python
-from superagent.core import MultiTaskAgent
+from app_launcher import AppLauncher
 
-agent = MultiTaskAgent(api_key=os.getenv('OPENROUTER_API_KEY'))
+launcher = AppLauncher()
+agent = EnhancedSuperAgent(
+    vision_api=vision_api,
+    app_launcher=launcher  # Enables direct app control
+)
 
-workflow = [
-    "Open Gmail",
-    "Find email from john@example.com",
-    "Extract contact information",
-    "Open HubSpot",
-    "Create new contact with extracted info"
-]
+# Agent automatically opens Chrome when needed
+result = agent.execute_task("search for competitor pricing")
+```
 
-result = agent.execute_workflow(workflow)
-print(f"Completed: {result['completed_tasks']}/{result['total_tasks']}")
+### Via REST API
+```bash
+curl -X POST http://localhost:10000/api/superagent/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "find information about OpenAI",
+    "userId": "user123",
+    "timeout": 300
+  }'
 ```
 
 ---
 
 ## 🐛 Debugging
 
-### View Logs
+### View Real-Time Logs
 ```bash
-docker logs -f aios_nelieo_phase1
+docker exec aios_nelieo_phase1 tail -f /var/log/agent-api.log
 ```
 
-### Run Tests Inside Container
+### Check Memory State
 ```bash
-docker exec -it aios_nelieo_phase1 python3 /opt/lumina-search-flow-main/test_superagent.py
+docker exec aios_nelieo_phase1 cat /var/log/superagent_memory.json
 ```
 
-### Check Stats
+### Test Endpoints
 ```bash
-curl http://localhost:8081/api/superagent/stats
+# Health check
+curl http://localhost:10000/health
+
+# Agent stats
+curl http://localhost:10000/api/superagent/stats
+
+# List available apps
+curl http://localhost:10000/api/apps
 ```
 
-### Screenshot Debug
+### Common Issues & Fixes
+
+**Vision sees blank:**
 ```python
-from superagent.executor import ActionExecutor
+# Increase wait time in enhanced_core.py line 475
+time.sleep(15)  # Was 5
+```
 
-executor = ActionExecutor()
-screenshot = executor._capture_screen()  # Returns base64 PNG
+**Loop detected:**
+```bash
+# Check threshold in enhanced_core.py line 520
+if self.short_memory.detect_loop(threshold=3):
+```
+
+**Rate limiting (429):**
+```python
+# Disable verification for OPEN_APP actions
+if action.type != ActionType.OPEN_APP:
+    verification = self._verify_action(...)
 ```
 
 ---
